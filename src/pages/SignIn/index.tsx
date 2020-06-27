@@ -59,7 +59,7 @@ const SignIn: React.FC = () => {
       </KeyboardAvoidingView>
 
       <CreateAccountButton onPress={() => {}}>
-        <Icon name="logIn" size={20} color="#ff9000"></Icon>
+        <Icon name="log-in" size={20} color="#ff9000"></Icon>
         <CreateAccountButtonText>Criar Conta</CreateAccountButtonText>
       </CreateAccountButton>
     </>
