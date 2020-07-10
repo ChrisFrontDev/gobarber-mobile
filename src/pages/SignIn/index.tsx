@@ -14,6 +14,8 @@ import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
+import { useAuth } from '../../hooks/Auth';
+
 import getValidationErrors from '../../utils/getValidationErros';
 
 import Input from '../../components/Input';
@@ -37,40 +39,44 @@ interface SignInFormData {
 
 const SignIn: React.FC = () => {
   const navigation = useNavigation();
+  const { signIn } = useAuth();
+
   const formRef = useRef<FormHandles>(null);
 
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleSignIn = useCallback(async (data: SignInFormData) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSignIn = useCallback(
+    async (data: SignInFormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      const schemaValidation = Yup.object().shape({
-        email: Yup.string()
-          .required('E-mail obrigatório')
-          .email('Digite um E-mail válido'),
-        password: Yup.string().required('Senha obrigatória'),
-      });
+        const schemaValidation = Yup.object().shape({
+          email: Yup.string()
+            .required('E-mail obrigatório')
+            .email('Digite um E-mail válido'),
+          password: Yup.string().required('Senha obrigatória'),
+        });
 
-      await schemaValidation.validate(data, {
-        abortEarly: false,
-      });
+        await schemaValidation.validate(data, {
+          abortEarly: false,
+        });
 
-      // await signIn({ email: data.email, password: data.password });
+        await signIn({ email: data.email, password: data.password });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
 
-      // history.push('/dashboard');
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
 
-        formRef.current?.setErrors(errors);
+          return;
+        }
 
-        return;
+        Alert.alert('Erro na Autenticação', 'Ocorreu um erro ao fazer login.');
       }
+    },
+    [signIn],
+  );
 
-      Alert.alert('Erro na Autenticação', 'Ocorreu um erro ao fazer login.');
-    }
-  }, []);
   return (
     <>
       <KeyboardAvoidingView
